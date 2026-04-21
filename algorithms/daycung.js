@@ -42,6 +42,27 @@ function _estimateM1m1(f, a, b, numPts = 500) {
   return { m1, M1 };
 }
 
+function _getPrecisionByEpsilon(epsilon) {
+  const tableDecimals = Math.max(0, Math.ceil(-Math.log10(epsilon)) + 2);
+  const reliableDigits = Math.max(1, Math.round(-Math.log10(2 * epsilon)));
+  return { tableDecimals, reliableDigits };
+}
+
+function _roundBySignificantDigits(value, significantDigits) {
+  if (!Number.isFinite(value)) return value;
+  if (Math.abs(value) < 1e-15) return 0;
+  const exponent = Math.floor(Math.log10(Math.abs(value)));
+  const decimalPlaces = significantDigits - exponent - 1;
+  const factor = Math.pow(10, decimalPlaces);
+  return Math.round(value * factor) / factor;
+}
+
+function _formatNumberForTable(value, decimals) {
+  if (!Number.isFinite(value)) return String(value);
+  if (Math.abs(value) < 1e-15) return '0';
+  return value.toFixed(decimals);
+}
+
 function solveDayCungUI(f, a, b, epsilon, maxIter, logger) {
   logger.section('KIỂM TRA ĐIỀU KIỆN');
   const fa = f(a), fb = f(b);
@@ -53,6 +74,7 @@ function solveDayCungUI(f, a, b, epsilon, maxIter, logger) {
     return;
   }
   logger.success('✔ f(a)·f(b) < 0 — khoảng hợp lệ.');
+  const { tableDecimals, reliableDigits } = _getPrecisionByEpsilon(epsilon);
 
   const { m1, M1 } = _estimateM1m1(f, a, b);
   const q = (M1 - m1) / m1;
@@ -111,9 +133,9 @@ function solveDayCungUI(f, a, b, epsilon, maxIter, logger) {
 
     tableData.push({
       'k': k,
-      'xₖ': xk.toFixed(10),
+      'xₖ': _formatNumberForTable(xk, tableDecimals),
       'f(xₖ)': fxk.toExponential(4),
-      'xₖ₊₁': xNext.toFixed(10),
+      'xₖ₊₁': _formatNumberForTable(xNext, tableDecimals),
       'f(xₖ₊₁)': fxNext.toExponential(4),
       'CT(1) |f|/m₁': errTarget.toExponential(4),
     });
@@ -123,17 +145,36 @@ function solveDayCungUI(f, a, b, epsilon, maxIter, logger) {
       logger.separator();
       logger.success(`✔ Hội tụ tại bước k = ${k}`);
       logger.text(`  Tiêu chí CT(1): |f(xₖ)|/m₁ = ${errTarget.toExponential(4)} < ε = ${epsilon}`);
-      logger.result(`Nghiệm xấp xỉ: x* ≈ ${xNext.toFixed(10)}`);
+      const xReliable = _roundBySignificantDigits(xNext, reliableDigits);
+      logger.result(`Nghiệm gần đúng (${reliableDigits} chữ số đáng tin): x* ≈ ${xReliable}`);
       logger.info(`Kiểm tra: f(x*) = ${fxNext.toExponential(6)}`);
-      return;
+      return {
+        converged: true,
+        criterion: 'CT1',
+        iteration: k,
+        xRaw: xNext,
+        xRounded: xReliable,
+        reliableDigits,
+        tableData,
+      };
     }
 
     if (errConsec !== null && errConsec < epsilon) {
       logger.table(tableData);
       logger.separator();
       logger.success(`✔ Hội tụ tại bước k = ${k} (CT2)`);
-      logger.result(`Nghiệm xấp xỉ: x* ≈ ${xNext.toFixed(10)}`);
-      return;
+      const xReliable = _roundBySignificantDigits(xNext, reliableDigits);
+      logger.result(`Nghiệm gần đúng (${reliableDigits} chữ số đáng tin): x* ≈ ${xReliable}`);
+      logger.info(`Kiểm tra: f(x*) = ${fxNext.toExponential(6)}`);
+      return {
+        converged: true,
+        criterion: 'CT2',
+        iteration: k,
+        xRaw: xNext,
+        xRounded: xReliable,
+        reliableDigits,
+        tableData,
+      };
     }
 
     xPrev = xk;
@@ -141,5 +182,14 @@ function solveDayCungUI(f, a, b, epsilon, maxIter, logger) {
   }
 
   logger.table(tableData);
-  logger.warn(`Không hội tụ sau ${maxIter} bước. Kết quả cuối: x ≈ ${xk.toFixed(10)}`);
+  const xReliable = _roundBySignificantDigits(xk, reliableDigits);
+  logger.warn(`Không hội tụ sau ${maxIter} bước. Kết quả cuối: x ≈ ${_formatNumberForTable(xk, tableDecimals)}`);
+  return {
+    converged: false,
+    iteration: maxIter,
+    xRaw: xk,
+    xRounded: xReliable,
+    reliableDigits,
+    tableData,
+  };
 }

@@ -24,10 +24,30 @@ function runLapDon(params, logger) {
   fixedPointIteration1D(phi, x0, q, eps, 100, logger);
 }
 
+function _getPrecisionByEpsilon(epsilon) {
+  const tableDecimals = Math.max(0, Math.ceil(-Math.log10(epsilon)) + 1);
+  const reliableDigits = Math.max(1, Math.round(-Math.log10(2 * epsilon)));
+  return { tableDecimals, reliableDigits };
+}
+
+function _roundBySignificantDigits(value, significantDigits) {
+  if (!Number.isFinite(value)) return value;
+  if (Math.abs(value) < 1e-15) return 0;
+  const exponent = Math.floor(Math.log10(Math.abs(value)));
+  const decimalPlaces = significantDigits - exponent - 1;
+  const factor = Math.pow(10, decimalPlaces);
+  return Math.round(value * factor) / factor;
+}
+
+function _formatNumberForTable(value, decimals) {
+  if (!Number.isFinite(value)) return String(value);
+  if (Math.abs(value) < 1e-15) return '0';
+  return value.toFixed(decimals);
+}
+
 function fixedPointIteration1D(phi, x0, q, epsilon, maxIter, logger) {
   const epsilon0 = ((1 - q) / q) * epsilon;
-  const tableDecimals = Math.ceil(-Math.log10(epsilon)) + 1;
-  const reliableDecimals = Math.round(-Math.log10(2 * epsilon));
+  const { tableDecimals, reliableDigits } = _getPrecisionByEpsilon(epsilon);
 
   logger.section('THÔNG TIN KHỞI ĐẦU');
   logger.info(`x₀ = ${x0}`);
@@ -41,7 +61,7 @@ function fixedPointIteration1D(phi, x0, q, epsilon, maxIter, logger) {
   let n = 0, diff = 0;
   const tableData = [];
 
-  tableData.push({ 'n': 0, 'xₙ': x0.toFixed(tableDecimals), '|xₙ - xₙ₋₁|': '—' });
+  tableData.push({ 'n': 0, 'xₙ': _formatNumberForTable(x0, tableDecimals), '|xₙ - xₙ₋₁|': '—' });
 
   logger.section('QUÁ TRÌNH LẶP');
 
@@ -52,8 +72,8 @@ function fixedPointIteration1D(phi, x0, q, epsilon, maxIter, logger) {
 
     tableData.push({
       'n': n,
-      'xₙ': x_curr.toFixed(tableDecimals),
-      '|xₙ - xₙ₋₁|': diff.toFixed(tableDecimals),
+      'xₙ': _formatNumberForTable(x_curr, tableDecimals),
+      '|xₙ - xₙ₋₁|': _formatNumberForTable(diff, tableDecimals),
     });
 
     if (diff < epsilon0) break;
@@ -66,7 +86,8 @@ function fixedPointIteration1D(phi, x0, q, epsilon, maxIter, logger) {
 
   if (diff < epsilon0) {
     logger.success(`✔ Thỏa mãn điều kiện dừng tại bước n = ${n}.`);
-    logger.result(`Nghiệm gần đúng (${reliableDecimals} chữ số đáng tin): x ≈ ${x_curr.toFixed(reliableDecimals)}`);
+    const xReliable = _roundBySignificantDigits(x_curr, reliableDigits);
+    logger.result(`Nghiệm gần đúng (${reliableDigits} chữ số đáng tin): x ≈ ${xReliable}`);
   } else {
     logger.warn(`⚠ Thuật toán không hội tụ sau ${maxIter} vòng lặp.`);
   }

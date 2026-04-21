@@ -15,17 +15,17 @@ function createLogger() {
 
   return {
     entries,
-    text:      (msg)  => push('text', msg),
-    info:      (msg)  => push('info', msg),
-    success:   (msg)  => push('success', msg),
-    warn:      (msg)  => push('warn', msg),
-    error:     (msg)  => push('error', msg),
-    step:      (msg)  => push('step', msg),
-    formula:   (msg)  => push('formula', msg),
-    result:    (msg)  => push('result', msg),
-    section:   (msg)  => push('section', msg),
-    separator: ()     => push('separator', null),
-    table:     (data) => push('table', data),
+    text: (msg) => push("text", msg),
+    info: (msg) => push("info", msg),
+    success: (msg) => push("success", msg),
+    warn: (msg) => push("warn", msg),
+    error: (msg) => push("error", msg),
+    step: (msg) => push("step", msg),
+    formula: (msg) => push("formula", msg),
+    result: (msg) => push("result", msg),
+    section: (msg) => push("section", msg),
+    separator: () => push("separator", null),
+    table: (data) => push("table", data),
   };
 }
 
@@ -33,41 +33,41 @@ function createLogger() {
 // RENDER LOGGER ENTRIES TO DOM
 // ============================================================
 function renderLog(entries, container) {
-  container.innerHTML = '';
+  container.innerHTML = "";
   let count = 0;
 
   entries.forEach((entry, idx) => {
-    if (entry.type === 'separator') {
-      const hr = document.createElement('hr');
-      hr.className = 'log-separator';
+    if (entry.type === "separator") {
+      const hr = document.createElement("hr");
+      hr.className = "log-separator";
       container.appendChild(hr);
       return;
     }
 
-    if (entry.type === 'section') {
-      const div = document.createElement('div');
-      div.className = 'log-section';
-      div.textContent = '▸ ' + entry.content;
+    if (entry.type === "section") {
+      const div = document.createElement("div");
+      div.className = "log-section";
+      div.textContent = "▸ " + entry.content;
       container.appendChild(div);
       count++;
       return;
     }
 
-    if (entry.type === 'table') {
+    if (entry.type === "table") {
       const data = entry.content;
       if (!data || data.length === 0) return;
 
-      const wrapper = document.createElement('div');
-      wrapper.className = 'log-table-wrapper';
+      const wrapper = document.createElement("div");
+      wrapper.className = "log-table-wrapper";
 
-      const table = document.createElement('table');
-      table.className = 'log-table';
+      const table = document.createElement("table");
+      table.className = "log-table";
 
       // Header
-      const thead = document.createElement('thead');
-      const headerRow = document.createElement('tr');
-      Object.keys(data[0]).forEach(key => {
-        const th = document.createElement('th');
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      Object.keys(data[0]).forEach((key) => {
+        const th = document.createElement("th");
         th.textContent = key;
         headerRow.appendChild(th);
       });
@@ -75,16 +75,16 @@ function renderLog(entries, container) {
       table.appendChild(thead);
 
       // Body
-      const tbody = document.createElement('tbody');
-      data.forEach(row => {
-        const tr = document.createElement('tr');
-        Object.values(row).forEach(val => {
-          const td = document.createElement('td');
+      const tbody = document.createElement("tbody");
+      data.forEach((row) => {
+        const tr = document.createElement("tr");
+        Object.values(row).forEach((val) => {
+          const td = document.createElement("td");
           // Handle multiline text (like operation logs)
-          if (typeof val === 'string' && val.includes('\n')) {
-            td.style.whiteSpace = 'pre';
+          if (typeof val === "string" && val.includes("\n")) {
+            td.style.whiteSpace = "pre";
           }
-          td.textContent = val !== null && val !== undefined ? String(val) : '';
+          td.textContent = val !== null && val !== undefined ? String(val) : "";
           tr.appendChild(td);
         });
         tbody.appendChild(tr);
@@ -92,8 +92,8 @@ function renderLog(entries, container) {
       table.appendChild(tbody);
       wrapper.appendChild(table);
 
-      const logEntry = document.createElement('div');
-      logEntry.className = 'log-entry';
+      const logEntry = document.createElement("div");
+      logEntry.className = "log-entry";
       logEntry.style.animationDelay = `${Math.min(idx * 10, 200)}ms`;
       logEntry.appendChild(wrapper);
       container.appendChild(logEntry);
@@ -103,23 +103,23 @@ function renderLog(entries, container) {
 
     // Text-based entries
     const classMap = {
-      text:    'log-text',
-      info:    'log-info',
-      success: 'log-success',
-      warn:    'log-warn',
-      error:   'log-error-text',
-      step:    'log-step',
-      formula: 'log-formula',
-      result:  'log-result',
+      text: "log-text",
+      info: "log-info",
+      success: "log-success",
+      warn: "log-warn",
+      error: "log-error-text",
+      step: "log-step",
+      formula: "log-formula",
+      result: "log-result",
     };
 
-    const div = document.createElement('div');
-    div.className = `log-entry ${classMap[entry.type] || 'log-text'}`;
+    const div = document.createElement("div");
+    div.className = `log-entry ${classMap[entry.type] || "log-text"}`;
     div.style.animationDelay = `${Math.min(idx * 8, 200)}ms`;
 
     // Handle multiline
-    if (typeof entry.content === 'string' && entry.content.includes('\n')) {
-      div.style.whiteSpace = 'pre';
+    if (typeof entry.content === "string" && entry.content.includes("\n")) {
+      div.style.whiteSpace = "pre";
     }
     div.textContent = entry.content;
     container.appendChild(div);
@@ -134,8 +134,8 @@ function renderLog(entries, container) {
 // ============================================================
 const ALGORITHMS = {
   bisection: {
-    title: 'Phương Pháp Chia Đôi',
-    subtitle: 'Bisection Method — f(x) = 0',
+    title: "Phương Pháp Chia Đôi",
+    subtitle: "Bisection Method — f(x) = 0",
     buildForm: () => `
       <div class="form-section-title">Hàm số</div>
       <div class="form-group">
@@ -162,17 +162,17 @@ const ALGORITHMS = {
       </div>
     `,
     getParams: () => ({
-      fStr:    document.getElementById('in-f').value.trim(),
-      a:       document.getElementById('in-a').value,
-      b:       document.getElementById('in-b').value,
-      epsilon: document.getElementById('in-eps').value,
+      fStr: document.getElementById("in-f").value.trim(),
+      a: document.getElementById("in-a").value,
+      b: document.getElementById("in-b").value,
+      epsilon: document.getElementById("in-eps").value,
     }),
     run: runBisection,
   },
 
   tieptuyen: {
-    title: 'Phương Pháp Tiếp Tuyến',
-    subtitle: 'Newton-Raphson 1D — f(x) = 0',
+    title: "Phương Pháp Tiếp Tuyến",
+    subtitle: "Newton-Raphson 1D — f(x) = 0",
     buildForm: () => `
       <div class="form-section-title">Hàm số và đạo hàm</div>
       <div class="form-group">
@@ -210,20 +210,20 @@ const ALGORITHMS = {
       </div>
     `,
     getParams: () => ({
-      fStr:    document.getElementById('in-f').value.trim(),
-      dfStr:   document.getElementById('in-df').value.trim(),
-      ddfStr:  document.getElementById('in-ddf').value.trim(),
-      a:       document.getElementById('in-a').value,
-      b:       document.getElementById('in-b').value,
-      m1:      document.getElementById('in-m1').value,
-      epsilon: document.getElementById('in-eps').value,
+      fStr: document.getElementById("in-f").value.trim(),
+      dfStr: document.getElementById("in-df").value.trim(),
+      ddfStr: document.getElementById("in-ddf").value.trim(),
+      a: document.getElementById("in-a").value,
+      b: document.getElementById("in-b").value,
+      m1: document.getElementById("in-m1").value,
+      epsilon: document.getElementById("in-eps").value,
     }),
     run: runTiepTuyen,
   },
 
   daycung: {
-    title: 'Phương Pháp Dây Cung',
-    subtitle: 'Secant/Chord Method — f(x) = 0',
+    title: "Phương Pháp Dây Cung",
+    subtitle: "Secant/Chord Method — f(x) = 0",
     buildForm: () => `
       <div class="form-section-title">Hàm số</div>
       <div class="form-group">
@@ -248,17 +248,17 @@ const ALGORITHMS = {
       </div>
     `,
     getParams: () => ({
-      fStr:    document.getElementById('in-f').value.trim(),
-      a:       document.getElementById('in-a').value,
-      b:       document.getElementById('in-b').value,
-      epsilon: document.getElementById('in-eps').value,
+      fStr: document.getElementById("in-f").value.trim(),
+      a: document.getElementById("in-a").value,
+      b: document.getElementById("in-b").value,
+      epsilon: document.getElementById("in-eps").value,
     }),
     run: runDayCung,
   },
 
   lapdon: {
-    title: 'Lặp Đơn 1 Biến',
-    subtitle: 'Fixed-Point Iteration 1D — x = φ(x)',
+    title: "Lặp Đơn 1 Biến",
+    subtitle: "Fixed-Point Iteration 1D — x = φ(x)",
     buildForm: () => `
       <div class="form-section-title">Hàm lặp</div>
       <div class="form-group">
@@ -283,17 +283,17 @@ const ALGORITHMS = {
       </div>
     `,
     getParams: () => ({
-      phiStr:  document.getElementById('in-phi').value.trim(),
-      x0:      document.getElementById('in-x0').value,
-      q:       document.getElementById('in-q').value,
-      epsilon: document.getElementById('in-eps').value,
+      phiStr: document.getElementById("in-phi").value.trim(),
+      x0: document.getElementById("in-x0").value,
+      q: document.getElementById("in-q").value,
+      epsilon: document.getElementById("in-eps").value,
     }),
     run: runLapDon,
   },
 
   gauss: {
-    title: 'Phương Pháp Gauss',
-    subtitle: 'Forward Elimination + Back Substitution — Ax = B',
+    title: "Phương Pháp Gauss",
+    subtitle: "Forward Elimination + Back Substitution — Ax = B",
     buildForm: () => `
       <div class="matrix-help">
         📋 Nhập mỗi hàng trên một dòng, các giá trị cách nhau bằng khoảng trắng hoặc dấu phẩy.<br/>
@@ -316,15 +316,15 @@ const ALGORITHMS = {
       </div>
     `,
     getParams: () => ({
-      matA: document.getElementById('in-matA').value,
-      matB: document.getElementById('in-matB').value,
+      matA: document.getElementById("in-matA").value,
+      matB: document.getElementById("in-matB").value,
     }),
     run: runGauss,
   },
 
   gaussjordan: {
-    title: 'Phương Pháp Gauss-Jordan',
-    subtitle: 'Row Reduction to RREF — Ax = B',
+    title: "Phương Pháp Gauss-Jordan",
+    subtitle: "Row Reduction to RREF — Ax = B",
     buildForm: () => `
       <div class="matrix-help">
         📋 Nhập mỗi hàng trên một dòng, các giá trị cách nhau bằng khoảng trắng hoặc dấu phẩy.<br/>
@@ -348,15 +348,15 @@ const ALGORITHMS = {
       </div>
     `,
     getParams: () => ({
-      matA: document.getElementById('in-matA').value,
-      matB: document.getElementById('in-matB').value,
+      matA: document.getElementById("in-matA").value,
+      matB: document.getElementById("in-matB").value,
     }),
     run: runGaussJordan,
   },
 
   newtonSystem: {
-    title: 'Newton Hệ Phi Tuyến',
-    subtitle: 'Newton Method for Nonlinear Systems',
+    title: "Newton Hệ Phi Tuyến",
+    subtitle: "Newton Method for Nonlinear Systems",
     buildForm: () => `
       <div class="matrix-help">
         ⚙️ Hệ phương trình được cố định từ bài toán mẫu:<br/>
@@ -376,15 +376,15 @@ const ALGORITHMS = {
       </div>
     `,
     getParams: () => ({
-      x0Str: document.getElementById('in-x0').value,
-      tol:   document.getElementById('in-tol').value,
+      x0Str: document.getElementById("in-x0").value,
+      tol: document.getElementById("in-tol").value,
     }),
     run: runNewtonSystem,
   },
 
   lapdonSystem: {
-    title: 'Lặp Đơn Hệ Phi Tuyến',
-    subtitle: 'Fixed-Point Iteration for Nonlinear Systems',
+    title: "Lặp Đơn Hệ Phi Tuyến",
+    subtitle: "Fixed-Point Iteration for Nonlinear Systems",
     buildForm: () => `
       <div class="matrix-help">
         ⚙️ Hệ hàm lặp Φ được cố định từ bài toán mẫu:<br/>
@@ -410,9 +410,9 @@ const ALGORITHMS = {
       </div>
     `,
     getParams: () => ({
-      x0Str:   document.getElementById('in-x0').value,
-      q:       document.getElementById('in-q').value,
-      epsilon: document.getElementById('in-eps').value,
+      x0Str: document.getElementById("in-x0").value,
+      q: document.getElementById("in-q").value,
+      epsilon: document.getElementById("in-eps").value,
     }),
     run: runLapDonSystem,
   },
@@ -421,18 +421,20 @@ const ALGORITHMS = {
 // ============================================================
 // LOCALSTORAGE — Save & Restore form state per algorithm
 // ============================================================
-const LS_PREFIX = 'gts-v1-';
+const LS_PREFIX = "gts-v1-";
 
 /**
  * Lưu tất cả input/textarea trong form hiện tại vào localStorage.
  * Key: "gts-v1-{algoKey}-{elementId}"
  */
 function saveFormState(algoKey) {
-  inputBody.querySelectorAll('input[id], textarea[id]').forEach(el => {
+  inputBody.querySelectorAll("input[id], textarea[id]").forEach((el) => {
     const key = `${LS_PREFIX}${algoKey}-${el.id}`;
     try {
       localStorage.setItem(key, el.value);
-    } catch (e) { /* quota exceeded — ignore */ }
+    } catch (e) {
+      /* quota exceeded — ignore */
+    }
   });
 }
 
@@ -441,7 +443,7 @@ function saveFormState(algoKey) {
  * Chỉ ghi đè giá trị default nếu localStorage có dữ liệu.
  */
 function restoreFormState(algoKey) {
-  inputBody.querySelectorAll('input[id], textarea[id]').forEach(el => {
+  inputBody.querySelectorAll("input[id], textarea[id]").forEach((el) => {
     const key = `${LS_PREFIX}${algoKey}-${el.id}`;
     const saved = localStorage.getItem(key);
     if (saved !== null) {
@@ -453,16 +455,16 @@ function restoreFormState(algoKey) {
 // ============================================================
 // APP STATE & DOM REFS
 // ============================================================
-let currentAlgo = 'bisection';
+let currentAlgo = "bisection";
 
-const btnRun       = document.getElementById('btnRun');
-const btnClear     = document.getElementById('btnClear');
-const inputBody    = document.getElementById('inputBody');
-const outputBody   = document.getElementById('outputBody');
-const emptyState   = document.getElementById('emptyState');
-const logCount     = document.getElementById('logCount');
-const pageTitle    = document.getElementById('pageTitle');
-const pageSubtitle = document.getElementById('pageSubtitle');
+const btnRun = document.getElementById("btnRun");
+const btnClear = document.getElementById("btnClear");
+const inputBody = document.getElementById("inputBody");
+const outputBody = document.getElementById("outputBody");
+const emptyState = document.getElementById("emptyState");
+const logCount = document.getElementById("logCount");
+const pageTitle = document.getElementById("pageTitle");
+const pageSubtitle = document.getElementById("pageSubtitle");
 
 // ============================================================
 // SWITCH ALGORITHM
@@ -472,8 +474,8 @@ function switchAlgo(algoKey) {
   currentAlgo = algoKey;
 
   // Update sidebar buttons
-  document.querySelectorAll('.algo-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.algo === algoKey);
+  document.querySelectorAll(".algo-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.algo === algoKey);
   });
 
   // Update title
@@ -491,12 +493,12 @@ function switchAlgo(algoKey) {
   clearOutput();
 
   // Auto-save on every change + Enter to run
-  inputBody.querySelectorAll('input[id], textarea[id]').forEach(el => {
-    el.addEventListener('input', () => saveFormState(algoKey));
-    el.addEventListener('change', () => saveFormState(algoKey));
-    if (el.tagName === 'INPUT') {
-      el.addEventListener('keydown', e => {
-        if (e.key === 'Enter') runAlgorithm();
+  inputBody.querySelectorAll("input[id], textarea[id]").forEach((el) => {
+    el.addEventListener("input", () => saveFormState(algoKey));
+    el.addEventListener("change", () => saveFormState(algoKey));
+    if (el.tagName === "INPUT") {
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") runAlgorithm();
       });
     }
   });
@@ -510,8 +512,8 @@ function runAlgorithm() {
   if (!cfg) return;
 
   btnRun.disabled = true;
-  btnRun.classList.add('running');
-  btnRun.textContent = '⏳ Đang chạy...';
+  btnRun.classList.add("running");
+  btnRun.textContent = "⏳ Đang chạy...";
 
   // Small timeout to allow UI to repaint
   setTimeout(() => {
@@ -524,7 +526,9 @@ function runAlgorithm() {
         try {
           const parsed = parseFloat(params.epsilon);
           params.epsilon = isNaN(parsed) ? params.epsilon : parsed;
-        } catch (e) { /* keep as string */ }
+        } catch (e) {
+          /* keep as string */
+        }
       }
       if (params.tol !== undefined) {
         const parsed = parseFloat(params.tol);
@@ -535,13 +539,13 @@ function runAlgorithm() {
       displayOutput(logger.entries);
     } catch (err) {
       const logger = createLogger();
-      logger.error('Lỗi không xác định: ' + err.message);
-      if (err.stack) logger.text(err.stack.split('\n').slice(0, 3).join('\n'));
+      logger.error("Lỗi không xác định: " + err.message);
+      if (err.stack) logger.text(err.stack.split("\n").slice(0, 3).join("\n"));
       displayOutput(logger.entries);
     } finally {
       btnRun.disabled = false;
-      btnRun.classList.remove('running');
-      btnRun.textContent = '▶ Chạy';
+      btnRun.classList.remove("running");
+      btnRun.textContent = "▶ Chạy";
     }
   }, 20);
 }
@@ -550,7 +554,7 @@ function runAlgorithm() {
 // DISPLAY OUTPUT
 // ============================================================
 function displayOutput(entries) {
-  if (emptyState) emptyState.style.display = 'none';
+  if (emptyState) emptyState.style.display = "none";
   const count = renderLog(entries, outputBody);
   logCount.textContent = `${count} mục`;
   // Scroll to top of output
@@ -561,11 +565,11 @@ function displayOutput(entries) {
 // CLEAR OUTPUT
 // ============================================================
 function clearOutput() {
-  outputBody.innerHTML = '';
-  logCount.textContent = '0 mục';
-  const empty = document.createElement('div');
-  empty.className = 'empty-state';
-  empty.id = 'emptyState';
+  outputBody.innerHTML = "";
+  logCount.textContent = "0 mục";
+  const empty = document.createElement("div");
+  empty.className = "empty-state";
+  empty.id = "emptyState";
   empty.innerHTML = `
     <div class="empty-icon">🔬</div>
     <p>Nhập tham số và nhấn <strong>▶ Chạy</strong> để bắt đầu.</p>
@@ -576,23 +580,27 @@ function clearOutput() {
 // ============================================================
 // EVENT LISTENERS
 // ============================================================
-btnRun.addEventListener('click', runAlgorithm);
-btnClear.addEventListener('click', clearOutput);
+btnRun.addEventListener("click", runAlgorithm);
+btnClear.addEventListener("click", clearOutput);
 
-document.querySelectorAll('.algo-btn').forEach(btn => {
-  btn.addEventListener('click', () => switchAlgo(btn.dataset.algo));
+document.querySelectorAll(".algo-btn").forEach((btn) => {
+  btn.addEventListener("click", () => switchAlgo(btn.dataset.algo));
 });
 
 // Sidebar toggle (mobile / compact)
-const sidebarToggle = document.getElementById('sidebarToggle');
-const sidebar       = document.getElementById('sidebar');
+const sidebarToggle = document.getElementById("sidebarToggle");
+const sidebar = document.getElementById("sidebar");
 
-sidebarToggle.addEventListener('click', () => {
-  const isCollapsed = sidebar.style.width === '60px';
-  sidebar.style.width = isCollapsed ? 'var(--sidebar-width)' : '60px';
-  sidebar.querySelectorAll('.algo-info, .sidebar-section-label, .logo-title, .logo-sub').forEach(el => {
-    el.style.display = isCollapsed ? '' : 'none';
-  });
+sidebarToggle.addEventListener("click", () => {
+  const isCollapsed = sidebar.style.width === "60px";
+  sidebar.style.width = isCollapsed ? "var(--sidebar-width)" : "60px";
+  sidebar
+    .querySelectorAll(
+      ".algo-info, .sidebar-section-label, .logo-title, .logo-sub",
+    )
+    .forEach((el) => {
+      el.style.display = isCollapsed ? "" : "none";
+    });
 });
 
 // ============================================================
@@ -604,17 +612,21 @@ const lastAlgo = localStorage.getItem(`${LS_PREFIX}last-algo`);
 const _origSwitchAlgo = switchAlgo;
 function switchAlgoWithPersist(algoKey) {
   _origSwitchAlgo(algoKey);
-  try { localStorage.setItem(`${LS_PREFIX}last-algo`, algoKey); } catch (e) {}
+  try {
+    localStorage.setItem(`${LS_PREFIX}last-algo`, algoKey);
+  } catch (e) {}
 }
 
 // Re-bind sidebar buttons to use persistent version
-document.querySelectorAll('.algo-btn').forEach(btn => {
+document.querySelectorAll(".algo-btn").forEach((btn) => {
   // Remove old listener by cloning, then re-add
   const clone = btn.cloneNode(true);
   btn.parentNode.replaceChild(clone, btn);
-  clone.addEventListener('click', () => switchAlgoWithPersist(clone.dataset.algo));
+  clone.addEventListener("click", () =>
+    switchAlgoWithPersist(clone.dataset.algo),
+  );
 });
 
 // Start with last algo or default
-const startAlgo = (lastAlgo && ALGORITHMS[lastAlgo]) ? lastAlgo : 'bisection';
+const startAlgo = lastAlgo && ALGORITHMS[lastAlgo] ? lastAlgo : "bisection";
 switchAlgoWithPersist(startAlgo);

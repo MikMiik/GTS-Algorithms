@@ -39,10 +39,30 @@ const _phiFuncsSystem = [
   (X) => -(1 / 20) * Math.exp(-X[0] * X[1]) - (10 * Math.PI - 3) / 60,
 ];
 
+function _getPrecisionByEpsilon(epsilon) {
+  const tableDecimals = Math.max(0, Math.ceil(-Math.log10(epsilon)) + 1);
+  const reliableDigits = Math.max(1, Math.round(-Math.log10(2 * epsilon)));
+  return { tableDecimals, reliableDigits };
+}
+
+function _roundBySignificantDigits(value, significantDigits) {
+  if (!Number.isFinite(value)) return value;
+  if (Math.abs(value) < 1e-15) return 0;
+  const exponent = Math.floor(Math.log10(Math.abs(value)));
+  const decimalPlaces = significantDigits - exponent - 1;
+  const factor = Math.pow(10, decimalPlaces);
+  return Math.round(value * factor) / factor;
+}
+
+function _formatNumberForTable(value, decimals) {
+  if (!Number.isFinite(value)) return String(value);
+  if (Math.abs(value) < 1e-15) return '0';
+  return value.toFixed(decimals);
+}
+
 function fixedPointSystemUI(X0, q, epsilon, maxIter, logger) {
   const epsilon0 = ((1 - q) / q) * epsilon;
-  const tableDecimals = Math.ceil(-Math.log10(epsilon)) + 1;
-  const reliableDecimals = Math.round(-Math.log10(2 * epsilon));
+  const { tableDecimals, reliableDigits } = _getPrecisionByEpsilon(epsilon);
   const n = X0.length;
 
   logger.section('THÔNG TIN HỆ PHƯƠNG TRÌNH (CỐ ĐỊNH)');
@@ -62,7 +82,7 @@ function fixedPointSystemUI(X0, q, epsilon, maxIter, logger) {
   let step = 0, maxDiff = 0;
   const tableData = [];
 
-  const fmtVec = (v) => `[${v.map(vi => vi.toFixed(tableDecimals)).join(', ')}]`;
+  const fmtVec = (v) => `[${v.map(vi => _formatNumberForTable(vi, tableDecimals)).join(', ')}]`;
 
   tableData.push({
     'k': 0,
@@ -85,7 +105,7 @@ function fixedPointSystemUI(X0, q, epsilon, maxIter, logger) {
     tableData.push({
       'k': step,
       'X_k': fmtVec(X_curr),
-      '||ΔX||∞': maxDiff.toFixed(tableDecimals),
+      '||ΔX||∞': _formatNumberForTable(maxDiff, tableDecimals),
     });
 
     if (maxDiff < epsilon0) break;
@@ -98,9 +118,10 @@ function fixedPointSystemUI(X0, q, epsilon, maxIter, logger) {
 
   if (maxDiff < epsilon0) {
     logger.success(`✔ Thỏa mãn điều kiện dừng tại bước k = ${step}.`);
-    logger.result(`Nghiệm gần đúng (${reliableDecimals} chữ số đáng tin): X ≈ [${X_curr.map(v => v.toFixed(reliableDecimals)).join(', ')}]`);
+    const XReliable = X_curr.map(v => _roundBySignificantDigits(v, reliableDigits));
+    logger.result(`Nghiệm gần đúng (${reliableDigits} chữ số đáng tin): X ≈ [${XReliable.join(', ')}]`);
   } else {
     logger.warn(`⚠ Thuật toán không hội tụ sau ${maxIter} vòng lặp.`);
-    logger.text(`Kết quả cuối: X = [${X_curr.map(v => v.toFixed(tableDecimals)).join(', ')}]`);
+    logger.text(`Kết quả cuối: X = ${fmtVec(X_curr)}`);
   }
 }

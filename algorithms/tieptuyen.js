@@ -6,9 +6,13 @@ function runTiepTuyen(params, logger) {
 
   let f, df, ddf;
   try {
-    f   = new Function('x', `"use strict"; return (${fStr});`);
-    df  = new Function('x', `"use strict"; return (${dfStr});`);
-    ddf = new Function('x', `"use strict"; return (${ddfStr});`);
+    const parsedF = _normalizeMathExpression(fStr);
+    const parsedDf = _normalizeMathExpression(dfStr);
+    const parsedDdf = _normalizeMathExpression(ddfStr);
+
+    f   = new Function('x', `"use strict"; return (${parsedF});`);
+    df  = new Function('x', `"use strict"; return (${parsedDf});`);
+    ddf = new Function('x', `"use strict"; return (${parsedDdf});`);
     f(1); df(1); ddf(1);
   } catch (e) {
     logger.error('Lỗi cú pháp hàm: ' + e.message);
@@ -25,6 +29,38 @@ function runTiepTuyen(params, logger) {
   if (m1 <= 0) { logger.error('m₁ phải là số dương (min|f\'(x)| trên [a,b]).'); return; }
 
   newtonMethod(f, df, ddf, a, b, m1, eps, 100, logger);
+}
+
+function _normalizeMathExpression(expr) {
+  if (typeof expr !== 'string') return expr;
+  return expr
+    // 2x, 2 x, )x  => 2*x, 2*x, )*x
+    .replace(/(\d|\))\s*x\b/g, '$1*x')
+    // x( ... ), 2( ... ), )( ... ) => x*(...), 2*(...), )*(...)
+    .replace(/(\d|x|\))\s*(?=\()/g, '$1*')
+    // )2 => )*2
+    .replace(/(\))\s*(?=\d)/g, '$1*');
+}
+
+function _getPrecisionByEpsilon(epsilon) {
+  const tableDecimals = Math.max(0, Math.ceil(-Math.log10(epsilon)) + 2);
+  const reliableDigits = Math.max(1, Math.round(-Math.log10(2 * epsilon)));
+  return { tableDecimals, reliableDigits };
+}
+
+function _roundBySignificantDigits(value, significantDigits) {
+  if (!Number.isFinite(value)) return value;
+  if (Math.abs(value) < 1e-15) return 0;
+  const exponent = Math.floor(Math.log10(Math.abs(value)));
+  const decimalPlaces = significantDigits - exponent - 1;
+  const factor = Math.pow(10, decimalPlaces);
+  return Math.round(value * factor) / factor;
+}
+
+function _formatNumberForTable(value, decimals) {
+  if (!Number.isFinite(value)) return String(value);
+  if (Math.abs(value) < 1e-15) return '0';
+  return value.toFixed(decimals);
 }
 
 function newtonMethod(f, df, ddf, a, b, m1, epsilon, maxIter, logger) {
@@ -49,8 +85,7 @@ function newtonMethod(f, df, ddf, a, b, m1, epsilon, maxIter, logger) {
     x_curr = b;
   }
 
-  const tableDecimals = Math.ceil(-Math.log10(epsilon)) + 2;
-  const reliableDecimals = Math.round(-Math.log10(2 * epsilon));
+  const { tableDecimals, reliableDigits } = _getPrecisionByEpsilon(epsilon);
 
   let n = 0;
   let fx = f(x_curr);
@@ -59,7 +94,7 @@ function newtonMethod(f, df, ddf, a, b, m1, epsilon, maxIter, logger) {
 
   tableData.push({
     'n': n,
-    'xₙ': x_curr.toFixed(tableDecimals),
+    'xₙ': _formatNumberForTable(x_curr, tableDecimals),
     'f(xₙ)': fx.toExponential(4),
     'sai số |f|/m₁': errorEstimate.toExponential(4),
   });
@@ -82,7 +117,7 @@ function newtonMethod(f, df, ddf, a, b, m1, epsilon, maxIter, logger) {
 
     tableData.push({
       'n': n,
-      'xₙ': x_curr.toFixed(tableDecimals),
+      'xₙ': _formatNumberForTable(x_curr, tableDecimals),
       'f(xₙ)': fx.toExponential(4),
       'sai số |f|/m₁': errorEstimate.toExponential(4),
     });
@@ -94,8 +129,26 @@ function newtonMethod(f, df, ddf, a, b, m1, epsilon, maxIter, logger) {
 
   if (errorEstimate <= epsilon) {
     logger.success(`✔ Hội tụ sau ${n} bước lặp.`);
-    logger.result(`Nghiệm gần đúng (${reliableDecimals} chữ số đáng tin): x ≈ ${x_curr.toFixed(reliableDecimals)}`);
+    const xReliable = _roundBySignificantDigits(x_curr, reliableDigits);
+    logger.result(`Nghiệm gần đúng (${reliableDigits} chữ số đáng tin): x ≈ ${xReliable}`);
+    return {
+      converged: true,
+      iteration: n,
+      xRaw: x_curr,
+      xRounded: xReliable,
+      reliableDigits,
+      tableData,
+    };
   } else {
     logger.warn(`⚠ Không đạt sai số sau ${maxIter} vòng lặp.`);
+    const xReliable = _roundBySignificantDigits(x_curr, reliableDigits);
+    return {
+      converged: false,
+      iteration: maxIter,
+      xRaw: x_curr,
+      xRounded: xReliable,
+      reliableDigits,
+      tableData,
+    };
   }
 }
