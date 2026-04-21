@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GTS — Giải Tích Số | Numerical Methods</title>
+  <meta name="description" content="Công cụ trực quan hóa 8 phương pháp giải tích số: Chia Đôi, Tiếp Tuyến, Dây Cung, Lặp Đơn, Gauss, Gauss-Jordan, Newton Hệ, Lặp Đơn Hệ." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">∑</span>
+          <div>
+            <span class="logo-title">GTS</span>
+            <span class="logo-sub">Giải Tích Số</span>
+          </div>
+        </div>
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
+      </div>
+
+      <div class="sidebar-section-label">Phương trình phi tuyến 1 biến</div>
+      <nav class="algo-nav">
+        <button class="algo-btn active" data-algo="bisection" id="btn-bisection">
+          <span class="algo-icon">⚡</span>
+          <div class="algo-info">
+            <span class="algo-name">Chia Đôi</span>
+            <span class="algo-desc">Bisection Method</span>
+          </div>
+        </button>
+        <button class="algo-btn" data-algo="tieptuyen" id="btn-tieptuyen">
+          <span class="algo-icon">∂</span>
+          <div class="algo-info">
+            <span class="algo-name">Tiếp Tuyến</span>
+            <span class="algo-desc">Newton-Raphson 1D</span>
+          </div>
+        </button>
+        <button class="algo-btn" data-algo="daycung" id="btn-daycung">
+          <span class="algo-icon">⌒</span>
+          <div class="algo-info">
+            <span class="algo-name">Dây Cung</span>
+            <span class="algo-desc">Secant Method</span>
+          </div>
+        </button>
+        <button class="algo-btn" data-algo="lapdon" id="btn-lapdon">
+          <span class="algo-icon">↺</span>
+          <div class="algo-info">
+            <span class="algo-name">Lặp Đơn 1 Biến</span>
+            <span class="algo-desc">Fixed-Point 1D</span>
+          </div>
+        </button>
+      </nav>
+
+      <div class="sidebar-section-label">Hệ phương trình tuyến tính</div>
+      <nav class="algo-nav">
+        <button class="algo-btn" data-algo="gauss" id="btn-gauss">
+          <span class="algo-icon">▦</span>
+          <div class="algo-info">
+            <span class="algo-name">Gauss</span>
+            <span class="algo-desc">Forward + Back Sub</span>
+          </div>
+        </button>
+        <button class="algo-btn" data-algo="gaussjordan" id="btn-gaussjordan">
+          <span class="algo-icon">▣</span>
+          <div class="algo-info">
+            <span class="algo-name">Gauss-Jordan</span>
+            <span class="algo-desc">Row Reduction</span>
+          </div>
+        </button>
+      </nav>
+
+      <div class="sidebar-section-label">Hệ phương trình phi tuyến</div>
+      <nav class="algo-nav">
+        <button class="algo-btn" data-algo="newtonSystem" id="btn-newtonSystem">
+          <span class="algo-icon">∇</span>
+          <div class="algo-info">
+            <span class="algo-name">Newton Hệ</span>
+            <span class="algo-desc">Newton for Systems</span>
+          </div>
+        </button>
+        <button class="algo-btn" data-algo="lapdonSystem" id="btn-lapdonSystem">
+          <span class="algo-icon">⟳</span>
+          <div class="algo-info">
+            <span class="algo-name">Lặp Đơn Hệ</span>
+            <span class="algo-desc">Fixed-Point System</span>
+          </div>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title" id="pageTitle">Phương Pháp Chia Đôi</h1>
+          <span class="page-subtitle" id="pageSubtitle">Bisection Method — f(x) = 0</span>
+        </div>
+        <div class="topbar-right">
+          <button class="btn-clear" id="btnClear" title="Xóa output">🗑 Xóa</button>
+          <button class="btn-run" id="btnRun" title="Chạy thuật toán">▶ Chạy</button>
+        </div>
+      </header>
+
+      <!-- Panel Area -->
+      <div class="panels">
+        <!-- Input Panel -->
+        <section class="panel panel-input" id="inputPanel">
+          <div class="panel-header">
+            <span class="panel-icon">📥</span>
+            <h2>Input</h2>
+          </div>
+          <div class="panel-body" id="inputBody">
+            <!-- Dynamic form injected by JS -->
+          </div>
+        </section>
+
+        <!-- Output Panel -->
+        <section class="panel panel-output" id="outputPanel">
+          <div class="panel-header">
+            <span class="panel-icon">📤</span>
+            <h2>Output — Log</h2>
+            <span class="log-count" id="logCount">0 mục</span>
+          </div>
+          <div class="panel-body log-container" id="outputBody">
+            <div class="empty-state" id="emptyState">
+              <div class="empty-icon">🔬</div>
+              <p>Nhập tham số và nhấn <strong>▶ Chạy</strong> để bắt đầu.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Algorithm modules -->
+  <script src="algorithms/bisection.js"></script>
+  <script src="algorithms/tieptuyen.js"></script>
+  <script src="algorithms/daycung.js"></script>
+  <script src="algorithms/lapdon.js"></script>
+  <script src="algorithms/gauss.js"></script>
+  <script src="algorithms/gaussjordan.js"></script>
+  <script src="algorithms/newton-system.js"></script>
+  <script src="algorithms/lapdon-system.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
